@@ -1,0 +1,54 @@
+---
+- name: Install required packages
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - openjdk-17-jre  # Jenkins requires Java
+    - git
+    - gnupg
+    - lsb-release
+    - wget
+
+- name: add jenkins key 
+  apt_key:  # ansible module to add key
+    url:  https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+    state: present 
+
+- name: add jenkins repo 
+  apt_repository: #ansible module to add repo 
+    repo: 'deb https://pkg.jenkins.io/debian-stable binary/'
+    state: present 
+
+- name: install jenkins  #install jenkins
+  apt: 
+    name: jenkins 
+    state: present 
+
+- name: Add Jenkins user to Docker group
+  user:
+    name: jenkins
+    groups: docker
+    append: yes
+
+- name: start jenkins service 
+  service: 
+    name: jenkins 
+    state: started 
+
+# get jenkins initial password in initialAdminPassword
+- name: Fetch Jenkins password
+  shell: cat /var/lib/jenkins/secrets/initialAdminPassword
+  changed_when: false
+  register: jenkins_initial_password
+
+# print jenkins initial password
+- name: print jenkins password
+  debug:
+    var: jenkins_initial_password.stdout
+
+- name: enable jenkins to start at boot time 
+  service: 
+    name: jenkins 
+    enabled: yes 
+

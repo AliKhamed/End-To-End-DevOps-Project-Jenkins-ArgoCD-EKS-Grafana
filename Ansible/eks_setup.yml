@@ -1,0 +1,74 @@
+---
+- name: Deploy ArgoCD, Prometheus, and Grafana on EKS Cluster
+  hosts: localhost
+  vars:
+    aws_profile: "default"
+    eks_cluster_name: "ivolve_eks_cluster"
+    eks_region: "us-east-1"
+  tasks:
+    - name: Update kubeconfig for EKS cluster
+      command: aws eks update-kubeconfig --name {{ eks_cluster_name }} --region {{ eks_region }} --profile {{ aws_profile }}
+      register: kubeconfig_output
+      ignore_errors: yes
+
+    - name: Print kubeconfig output
+      debug:
+        var: kubeconfig_output
+
+    - name: Fail if kubeconfig update failed
+      fail:
+        msg: "Failed to update kubeconfig for EKS cluster."
+      when: kubeconfig_output.rc != 0
+
+    - name: Ensure Helm is installed
+      command: helm version
+      register: helm_version
+      failed_when: helm_version.rc != 0
+
+    - name: Add Helm repositories
+      ansible.builtin.command:
+        cmd: helm repo add {{ item.name }} {{ item.repo }}
+      loop:
+        - name: argo
+          repo: https://argoproj.github.io/argo-helm
+        - name: prometheus-community
+          repo: https://prometheus-community.github.io/helm-charts
+        - name: grafana
+          repo: https://grafana.github.io/helm-charts
+      register: helm_repo_add
+      changed_when: "'has been added' in item.stdout"
+
+    - name: Update Helm repositories
+      ansible.builtin.command:
+        cmd: helm repo update
+      register: helm_repo_update
+
+    - name: Create namespaces
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: "{{ item }}"
+      loop:
+        - argocd
+        - monitoring
+
+    - name: Deploy ArgoCD using Helm
+      community.kubernetes.helm:
+        name: argocd
+        chart_ref: argo/argo-cd
+        release_namespace: argocd
+
+    - name: Deploy Prometheus using Helm
+      community.kubernetes.helm:
+        name: prometheus
+        chart_ref: prometheus-community/prometheus
+        release_namespace: monitoring
+
+    - name: Deploy Grafana using Helm
+      community.kubernetes.helm:
+        name: grafana
+        chart_ref: grafana/grafana
+        release_namespace: monitoring

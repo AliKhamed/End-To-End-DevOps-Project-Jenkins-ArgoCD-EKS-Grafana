@@ -1,0 +1,14 @@
+---
+- name: Update kubeconfig for EKS cluster
+  become: true
+  command: aws eks update-kubeconfig --name {{ eks_cluster_name }} --region {{ region }} --profile {{ aws_profile }}
+  environment:
+    AWS_DEFAULT_REGION: "{{ region }}"
+    HOME: "{{ ansible_env.HOME }}"  # Ensure HOME environment variable is set
+  register: kubeconfig_output
+  ignore_errors: true
+
+- name: Print kubeconfig output
+  debug:
+    var: kubeconfig_output
+  when: kubeconfig_output.rc != 0

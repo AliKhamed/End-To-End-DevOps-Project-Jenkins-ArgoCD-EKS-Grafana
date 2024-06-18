@@ -1,0 +1,11 @@
+- name: Create namespace for ArgoCD
+  kubernetes.core.k8s:
+    api_version: v1
+    kind: Namespace
+    name: argocd
+
+- name: Install ArgoCD
+  kubernetes.core.k8s:
+    state: present
+    namespace: argocd
+    definition: "{{ lookup('url', 'https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml') }}"

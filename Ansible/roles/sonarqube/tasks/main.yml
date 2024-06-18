@@ -1,0 +1,136 @@
+---
+# This is needed to run SonarQube (more accurate ElasticSearch):
+- name: "sysctl -w vm.max_map_count=262144"
+  ansible.posix.sysctl:
+    name: vm.max_map_count
+    value: '262144'
+    sysctl_set: yes
+
+- name: Create volume directories.
+  become: true
+  ansible.builtin.file:
+    owner: root
+    group: root
+    name: "{{item}}"
+    state: directory
+  loop:
+    - "{{ sonarqube_volumes_base }}"
+    - "{{ sonarqube_volumes_base }}/conf"
+    - "{{ sonarqube_volumes_base }}/data"
+    - "{{ sonarqube_volumes_base }}/extensions"
+    - "{{ sonarqube_volumes_base }}/logs"
+    - "{{ sonarqube_volumes_base }}/postgresql"
+
+- name: Pull PostgreSQL Image
+  community.docker.docker_image:
+    name: "{{ postgres_image }}"
+    source: pull
+
+- name: Pull SonarQube Image
+  community.docker.docker_image:
+    name: sonarqube:latest
+    source: pull
+
+- name: Create a network (SonarQube)
+  community.docker.docker_network:
+    name: net_sonarqube
+
+- name: Start PostgreSQL container
+  community.docker.docker_container:
+    name: postgresql-sonarqube
+    image: "{{ postgres_image }}"
+    recreate: true
+    state: "started"
+    restart_policy: "unless-stopped"
+    env:
+      POSTGRES_PASSWORD: "{{ postgres_password }}"
+      POSTGRES_USER: "{{ postgres_user }}"
+      POSTGRES_DB: "{{ postgres_db }}"
+    networks:
+      - name: "net_sonarqube"
+    mounts:
+      - source: volume_sonar_postgres
+        target: /var/lib/postgresql/data
+
+- name: Start SonarQube container
+  community.docker.docker_container:
+    name: SonarQube
+    image: sonarqube:latest
+    recreate: true
+    state: "started"
+    restart_policy: "unless-stopped"
+    restart: true
+    ports:
+      - "{{ sonarqube_port }}:9000"
+    env:
+      SONAR_JDBC_USERNAME: "{{ postgres_user }}"
+      SONAR_JDBC_PASSWORD: "{{ postgres_password }}"
+      SONAR_JDBC_URL: "jdbc:postgresql://postgresql-sonarqube:5432/{{ postgres_db }}"
+    networks:
+      - name: "net_sonarqube"
+    mounts:
+      - source: volume_sonar_conf
+        target: /opt/sonarqube/conf
+      - source: volume_sonar_data
+        target: /opt/sonarqube/data
+      - source: volume_sonar_extensions
+        target: /opt/sonarqube/extensions
+      - source: volume_sonar_logs
+        target: /opt/sonarqube/logs
+
+- name: "Wait until SonarQube Container is reachable via TCP/IP."
+  ansible.builtin.wait_for:
+    host: "localhost"
+    port: "{{ sonarqube_port }}"
+    state: drained
+    delay: 5
+    connect_timeout: 15
+    timeout: 30
+
+- name: Check SonarQube to be healthy.
+  ansible.builtin.uri:
+    url: "http://localhost:{{ sonarqube_port }}/api/system/health"
+    user: "{{ sonarqube_admin_login }}"
+    password: "{{ sonarqube_admin_password }}"
+    method: GET
+    force_basic_auth: yes
+  register: response
+  until:
+    - "response.status == 200"
+    - "'GREEN' == response.json.health"
+  retries: 10 # 10 * 6 seconds = 60 seconds.
+  delay: 6 # every 5 seconds
+
+- name: Create CI User
+  ansible.builtin.uri:
+    url: "http://localhost:{{ sonarqube_port }}/api/users/create?local=true&login={{ sonarqube_ci_login }}&name={{ sonarqube_ci_name | urlencode }}&password={{ sonarqube_ci_password }}"
+    user: "{{ sonarqube_admin_login }}"
+    password: "{{ sonarqube_admin_password }}"
+    method: POST
+    force_basic_auth: yes
+  register: ciresponse
+  failed_when: ciresponse.status != 200
+
+- name: Create CI User Token.
+  ansible.builtin.uri:
+    url: "http://localhost:{{ sonarqube_port }}/api/user_tokens/generate?login={{ sonarqube_ci_login }}&name={{ sonarqube_ci_token_purpose | urlencode }}"
+    user: "{{ sonarqube_ci_login }}"
+    password: "{{ sonarqube_ci_password }}"
+    method: POST
+    force_basic_auth: yes
+  register: ciresponsetoken
+  failed_when: ciresponsetoken.status != 200
+- debug:
+    msg: "TOKEN: {{ ciresponsetoken.json }}"
+
+- name: Change Password of admin user.
+  ansible.builtin.uri:
+    url: "http://localhost:{{ sonarqube_port }}/api/users/change_password?login={{ sonarqube_admin_login }}&password={{ sonarqube_admin_newpassword }}&previousPassword={{ sonarqube_admin_password }}"
+    user: "{{ sonarqube_admin_login }}"
+    password: "{{ sonarqube_admin_password }}"
+    method: POST
+    force_basic_auth: yes
+  register: responsecpw
+  failed_when: responsecpw.status != 204
+
+

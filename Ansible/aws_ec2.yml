@@ -1,0 +1,11 @@
+plugin: amazon.aws.aws_ec2
+regions:
+  - us-east-1  # Specify your AWS region(s) here
+filters:
+  tag:Name: Jenkins_server  # Filter instances by the tag Name=test
+  instance-state-name: running  # Only include running instances
+keyed_groups:
+  - key: tags.Name  # Group instances by their 'Name' tag
+    prefix: tag
+compose:
+  ansible_host: public_ip_address  # Use the public IP address to connect

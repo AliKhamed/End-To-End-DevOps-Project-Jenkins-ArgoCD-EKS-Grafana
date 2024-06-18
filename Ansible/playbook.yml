@@ -1,0 +1,14 @@
+- name: Install Docker, Jenkins, and SonarQube
+  hosts: all
+  roles:
+    - docker
+    - jenkins
+    - sonarqube
+    - oc_cli
+
+- name: Set up EKS cluster and install ArgoCD, Prometheus, Grafana
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Include EKS setup playbook
+      import_tasks: eks_setup.yml

@@ -1,0 +1,15 @@
+---
+# Define your variables here
+sonarqube_port: 9000
+sonarqube_volumes_base: /opt/sonarqube_volumes
+postgres_image: postgres:15-alpine
+postgres_password: cG9zdGdyZXNxbC1zb25hcnF1YmU=
+postgres_user: postgresql-sonarqube
+postgres_db: postgresql-sonarqube
+sonarqube_admin_login: admin
+sonarqube_admin_password: YWRtaW4=
+sonarqube_ci_login: ali
+sonarqube_ci_password: YWxpNTA4
+sonarqube_ci_name: CI User
+sonarqube_ci_token_purpose: CI Token Purpose
+sonarqube_admin_newpassword: c29uYXI=
