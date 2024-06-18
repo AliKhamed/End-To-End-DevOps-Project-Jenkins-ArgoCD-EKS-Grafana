@@ -6,7 +6,8 @@ metadata:
     nginx.ingress.kubernetes.io/ssl-redirect: "false"  # Optional: Set to true if using SSL/TLS
 spec:
   rules:
-    - http:
+    - host: your-domain.example.com  # Replace with your domain
+      http:
         paths:
           - path: /
             pathType: Prefix
