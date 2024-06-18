@@ -3,10 +3,10 @@ kind: Service
 metadata:
   name: java-app-service
 spec:
-  ports:
-  - port: 8081
-    protocol: TCP
-    targetPort: 8081
   selector:
     app: java-app
-  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 8081  # Port exposed by the service
+      targetPort: 8081  # Port on the container
+  type: ClusterIP  # Expose the service within the cluster
