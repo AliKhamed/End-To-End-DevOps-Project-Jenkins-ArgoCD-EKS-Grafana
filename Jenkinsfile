@@ -1,4 +1,4 @@
-@Library('Jenkins-Shared-Library')_
+@Library('Argo-Shared-Library')_
 
 pipeline {
     agent any
@@ -9,7 +9,7 @@ pipeline {
         nameSpace = 'alikhames'
         clusterUrl = 'https://api.ocp-training.ivolve-test.com:6443'
         SONAR_PROJECT_KEY = 'ivolve_java_app'
-        gitRepoName = 'MultiCloudDevOpsProject'
+        gitRepoName = 'End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana'
         gitUserName = 'Alikhamed'
         gitUserEmail = 'Alikhames566@gmail.com'
         githubToken = 'github-token'
