@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: java-app-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"  # Optional: Set to true if using SSL/TLS
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: java-app-service
+                port:
+                  number: 8081  # Port number of your service
