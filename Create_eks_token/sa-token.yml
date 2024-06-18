@@ -26,3 +26,12 @@ roleRef:
   kind: Role
   name: deployer-role
   apiGroup: rbac.authorization.k8s.io
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: sa-secret
+  annotations:
+    kubernetes.io/service-account.name: deployer  # Associate with the deployer ServiceAccount
+type: kubernetes.io/service-account-token
