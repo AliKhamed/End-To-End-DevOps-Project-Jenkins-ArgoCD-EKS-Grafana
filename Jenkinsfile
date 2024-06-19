@@ -73,7 +73,7 @@ pipeline {
             steps {
                 script { 
                     // Use the EKS token directly to authenticate
-                    withCredentials([string(credentialsId: "${eksTokenCredentialsID}", variable: 'EKS_TOKEN')]) {
+                    withCredentials([string(credentialsId: "eks-token", variable: 'EKS_TOKEN')]) {
                         // Set up kubeconfig with the EKS token
                         sh """
                             aws eks --region $AWS_REGION update-kubeconfig --name $CLUSTER_NAME --kubeconfig $KUBECONFIG_PATH
