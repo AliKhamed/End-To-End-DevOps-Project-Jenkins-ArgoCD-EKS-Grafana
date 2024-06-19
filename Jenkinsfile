@@ -15,6 +15,9 @@ pipeline {
         sonarqubeUrl = 'http://192.168.49.1:9000/'
         sonarTokenCredentialsID = 'sonar-token'
         eksTokenCredentialsID = 'eks-token'  // Assuming this holds the EKS API token directly
+        AWS_REGION = 'us-east-1'
+        CLUSTER_NAME = 'ivolve_eks_cluster'
+        KUBECONFIG_PATH = '/tmp/kubeconfig'
     }
     
     stages {       
@@ -73,12 +76,16 @@ pipeline {
                     withCredentials([string(credentialsId: "${eksTokenCredentialsID}", variable: 'EKS_TOKEN')]) {
                         // Set up kubeconfig with the EKS token
                         sh """
-                            aws eks --region us-east-1 update-kubeconfig --name ivolve_eks_cluster --kubeconfig /tmp/kubeconfig --kubeconfig-arg token=$EKS_TOKEN
+                            aws eks --region $AWS_REGION update-kubeconfig --name $CLUSTER_NAME --kubeconfig $KUBECONFIG_PATH
+                            
+                            # Modify the kubeconfig to use the service account token
+                            kubectl config set-credentials my-service-account --token=$EKS_TOKEN --kubeconfig=$KUBECONFIG_PATH
+                            kubectl config set-context --current --user=my-service-account --kubeconfig=$KUBECONFIG_PATH
                         """
                         
                         // Example: Apply deployment.yaml
                         sh """
-                            kubectl apply -f argoCD_application.yaml --kubeconfig /tmp/kubeconfig
+                            kubectl apply -f argoCD_application.yaml --kubeconfig $KUBECONFIG_PATH
                         """
                     }
                 }
