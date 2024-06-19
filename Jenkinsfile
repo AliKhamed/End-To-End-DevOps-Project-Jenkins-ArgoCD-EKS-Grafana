@@ -18,6 +18,7 @@ pipeline {
         AWS_REGION = 'us-east-1'
         CLUSTER_NAME = 'ivolve_eks_cluster'
         KUBECONFIG_PATH = '/tmp/kubeconfig'
+        awsCredentialsID = 'aws-credentials'  // The ID of the AWS credentials stored in Jenkins
     }
     
     stages {       
@@ -73,20 +74,22 @@ pipeline {
             steps {
                 script { 
                     // Use the EKS token directly to authenticate
-                    withCredentials([string(credentialsId: "eks-token", variable: 'EKS_TOKEN')]) {
-                        // Set up kubeconfig with the EKS token
-                        sh """
-                            aws eks --region $AWS_REGION update-kubeconfig --name $CLUSTER_NAME --kubeconfig $KUBECONFIG_PATH
+                    withCredentials([string(credentialsId: "${eksTokenCredentialsID}", variable: 'EKS_TOKEN')]) {
+                        withAWS(credentials: "${awsCredentialsID}", region: "${AWS_REGION}") {
+                            // Set up kubeconfig with the EKS token
+                            sh """
+                                aws eks --region $AWS_REGION update-kubeconfig --name $CLUSTER_NAME --kubeconfig $KUBECONFIG_PATH
+                                
+                                # Modify the kubeconfig to use the service account token
+                                kubectl config set-credentials my-service-account --token=$EKS_TOKEN --kubeconfig=$KUBECONFIG_PATH
+                                kubectl config set-context --current --user=my-service-account --kubeconfig=$KUBECONFIG_PATH
+                            """
                             
-                            # Modify the kubeconfig to use the service account token
-                            kubectl config set-credentials my-service-account --token=$EKS_TOKEN --kubeconfig=$KUBECONFIG_PATH
-                            kubectl config set-context --current --user=my-service-account --kubeconfig=$KUBECONFIG_PATH
-                        """
-                        
-                        // Example: Apply deployment.yaml
-                        sh """
-                            kubectl apply -f argoCD_application.yaml --kubeconfig $KUBECONFIG_PATH
-                        """
+                            // Example: Apply deployment.yaml
+                            sh """
+                                kubectl apply -f argoCD_application.yaml --kubeconfig $KUBECONFIG_PATH
+                            """
+                        }
                     }
                 }
             }
