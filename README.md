@@ -31,43 +31,54 @@ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.pas
     Create a YAML manifest (sa-token.yml):
 
 ```
+# service-account.yaml
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: deployer
-
+  name: my-service-account
+  namespace: default
+secrets:
+  - name: my-service-account-secret
 ---
+# role.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: deployer-role
+  namespace: default
+  name: my-role
 rules:
 - apiGroups: [""]
-  resources: ["pods", "services", "deployments", "ingresses"]  # Example resources, adjust as needed
-  verbs: ["create", "get", "update", "delete", "list", "watch"]
-
---- 
+  resources: ["pods", "services", "deployments"]
+  verbs: ["get", "list", "create", "delete", "update"]
+---
+# role-binding.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: deployer-rolebinding
+  name: my-role-binding
+  namespace: default
 subjects:
 - kind: ServiceAccount
-  name: deployer
-  namespace: default  # Adjust the namespace as per your requirements
+  name: my-service-account
+  namespace: default
 roleRef:
   kind: Role
-  name: deployer-role
+  name: my-role
   apiGroup: rbac.authorization.k8s.io
-
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: my-service-account-secret
+  annotations:
+    kubernetes.io/service-account.name: "my-service-account"
+type: kubernetes.io/service-account-token
 
 ```
 
 2. Get Token And add it as a credential on Jenkins UI
 
 ```
-SECRET=$(kubectl get serviceaccount deployer -o jsonpath='{.secrets[0].name}')
-TOKEN=$(kubectl get secret $SECRET -o jsonpath='{.data.token}' | base64 --decode)
-echo $TOKEN
+kubectl get secret my-service-account-secret -o jsonpath='{.data.token}' | base64 --decode
 
 ```
