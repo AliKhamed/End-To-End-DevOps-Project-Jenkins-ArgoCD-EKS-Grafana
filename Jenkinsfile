@@ -1,7 +1,7 @@
 @Library('Argo-Shared-Library')_
 pipeline {
     agent any
-    
+
     environment {
         dockerHubCredentialsID = 'DockerHub'   // DockerHub credentials ID.
         imageName = 'alikhames/java-app'        // DockerHub repo/image name.
@@ -17,7 +17,7 @@ pipeline {
         KUBECONFIG_PATH = '/tmp/kubeconfig'
         awsCredentialsID = 'aws-credentials'  // The ID of the AWS credentials stored in Jenkins
     }
-    
+
     stages {       
         stage('Run Unit Test') {
             steps {
@@ -72,9 +72,12 @@ pipeline {
                 script {
                     // Configure AWS CLI with Jenkins credentials
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: awsCredentialsID, accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
-                        sh """
-                            aws eks --region $AWS_REGION update-kubeconfig --name $CLUSTER_NAME
-                        """
+                        // Masking the credentials
+                        maskPasswords {
+                            sh """
+                                aws eks --region $AWS_REGION update-kubeconfig --name $CLUSTER_NAME
+                            """
+                        }
                     }
 
                     // Set KUBECONFIG environment variable
