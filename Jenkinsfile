@@ -71,23 +71,26 @@ pipeline {
 
         stage('Deploy on EKS') {
             steps {
-                script {
-                    // Configure AWS CLI with Jenkins credentials
-                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: awsCredentialsID, accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: awsCredentialsID, accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
+                    script {
+                        // Configure AWS CLI with Jenkins credentials
                         sh """
-                            aws eks --region $AWS_DEFAULT_REGION update-kubeconfig --name $CLUSTER_NAME
+                            aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+                            aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+                            aws configure set default.region $AWS_DEFAULT_REGION
+                            aws eks update-kubeconfig --name $CLUSTER_NAME
                             sed -i 's|client.authentication.k8s.io/v1alpha1|client.authentication.k8s.io/v1beta1|g' $KUBECONFIG_PATH
                             cat $KUBECONFIG_PATH
                         """
+
+                        // Set KUBECONFIG environment variable
+                        env.KUBECONFIG = "${KUBECONFIG_PATH}"
+
+                        // Apply Kubernetes manifests with validation turned off
+                        sh """
+                            kubectl apply -f argoCD_application.yaml --validate=false
+                        """
                     }
-
-                    // Set KUBECONFIG environment variable
-                    env.KUBECONFIG = "${KUBECONFIG_PATH}"
-
-                    // Apply Kubernetes manifests with validation turned off
-                    sh """
-                        kubectl apply -f argoCD_application.yaml --validate=false
-                    """
                 }
             }
         }
