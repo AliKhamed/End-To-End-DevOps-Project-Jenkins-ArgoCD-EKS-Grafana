@@ -78,11 +78,9 @@ pipeline {
                         sh """
                             kubectl apply -f argoCD_application.yaml
                         """
-                        }
-                    }
                 }
             }
-        }
+         }
     }
 
     post {
