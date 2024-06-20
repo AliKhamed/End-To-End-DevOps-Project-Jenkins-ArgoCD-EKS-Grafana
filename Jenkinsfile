@@ -75,7 +75,7 @@ pipeline {
  
                     sh """
                     aws eks update-kubeconfig --name $CLUSTER_NAME"
-                    sed -i 's/client.authentication.k8s.io\\/v1alpha1/client.authentication.k8s.io\\/v1beta1/g' $KUBECONFIG_PATH
+                    sed -i 's|client.authentication.k8s.io\\/v1alpha1|client.authentication.k8s.io\\/v1beta1|g' $KUBECONFIG_PATH
                     kubectl apply -f argoCD_application.yaml
                     """
                 }
