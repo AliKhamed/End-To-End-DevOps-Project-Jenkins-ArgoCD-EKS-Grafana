@@ -13,7 +13,7 @@ pipeline {
         sonarTokenCredentialsID = 'sonar-token'
         eksTokenCredentialsID = 'eks-token'  // Assuming this holds the EKS API token directly
         CLUSTER_NAME = 'ivolve_eks_cluster'
-        KUBECONFIG_PATH = '/tmp/kubeconfig'
+        KUBECONFIG_PATH = '/var/lib/jenkins/.kube/config'
         awsCredentialsID = 'aws-credentials'  
         AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS_KEY_ID')
         AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
@@ -73,8 +73,11 @@ pipeline {
             steps {
                 script {
  
-                    sh "aws eks update-kubeconfig --name $CLUSTER_NAME"
-                    sh "kubectl apply -f argoCD_application.yaml"
+                    sh """
+                    aws eks update-kubeconfig --name $CLUSTER_NAME"
+                    sed -i 's/client.authentication.k8s.io\\/v1alpha1/client.authentication.k8s.io\\/v1beta1/g' $KUBECONFIG_PATH
+                    kubectl apply -f argoCD_application.yaml
+                    """
                 }
             }
         }
