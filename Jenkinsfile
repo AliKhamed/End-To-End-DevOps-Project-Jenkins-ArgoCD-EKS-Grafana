@@ -12,10 +12,12 @@ pipeline {
         sonarqubeUrl = 'http://192.168.49.1:9000/'
         sonarTokenCredentialsID = 'sonar-token'
         eksTokenCredentialsID = 'eks-token'  // Assuming this holds the EKS API token directly
-        AWS_REGION = 'us-east-1'
         CLUSTER_NAME = 'ivolve_eks_cluster'
         KUBECONFIG_PATH = '/tmp/kubeconfig'
-        awsCredentialsID = 'aws-credentials'  // The ID of the AWS credentials stored in Jenkins
+        awsCredentialsID = 'aws-credentials'  
+        AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS_KEY_ID')
+        AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
+        AWS_DEFAULT_REGION = "us-east-1"
     }
 
     stages {       
@@ -70,23 +72,11 @@ pipeline {
         stage('Deploy on EKS') {
             steps {
                 script {
-                    // Configure AWS CLI with Jenkins credentials
-                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: awsCredentialsID, accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
-                        // Masking the credentials
-                        maskPasswords {
-                            sh """
-                                aws eks --region $AWS_REGION update-kubeconfig --name $CLUSTER_NAME
-                            """
-                        }
-                    }
-
-                    // Set KUBECONFIG environment variable
-                    env.KUBECONFIG = "${KUBECONFIG_PATH}"
-
-                    // Apply Kubernetes manifests
-                    sh """
-                        kubectl apply -f argoCD_application.yaml
-                    """
+ 
+                    # Update packages inside the cluster
+                    sh "aws eks update-kubeconfig --name $CLUSTER_NAME"
+                    # Deploy an application
+                    sh "kubectl apply -f argoCD_application.yaml"
                 }
             }
         }
