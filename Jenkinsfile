@@ -71,7 +71,7 @@ pipeline {
             steps {
                 script { 
                         sh """
-                            aws eks --region $AWS_REGION update-kubeconfig --name $CLUSTER_NAME
+                            aws eks --region $AWS_REGION update-kubeconfig --name $CLUSTER_NAME --profile default
                             
                         """
                             
