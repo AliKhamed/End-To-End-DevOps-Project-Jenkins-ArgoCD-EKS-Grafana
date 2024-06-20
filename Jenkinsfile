@@ -5,9 +5,6 @@ pipeline {
     environment {
         dockerHubCredentialsID = 'DockerHub'   // DockerHub credentials ID.
         imageName = 'alikhames/java-app'        // DockerHub repo/image name.
-        nameSpace = 'alikhames'
-        clusterUrl = 'https://api.ocp-training.ivolve-test.com:6443'
-        SONAR_PROJECT_KEY = 'ivolve_java_app'
         gitRepoName = 'End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana'
         gitUserName = 'Alikhamed'
         gitUserEmail = 'Alikhames566@gmail.com'
