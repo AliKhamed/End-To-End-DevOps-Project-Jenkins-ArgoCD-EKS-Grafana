@@ -2,12 +2,12 @@ plugins {
     id 'org.springframework.boot' version '2.6.3'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'java'
-    id "org.sonarqube" version "5.0.0.4638"
+    id "org.sonarqube" version "10.5.1"
 }
 sonar {
   properties {
-    property "sonar.projectKey", "java-application"
-    property "sonar.projectName", "java-application"
+    property "sonar.projectKey", "my-sonarqube-demo"
+    property "sonar.projectName", "my-sonarqube-demo"
   }
 }
 
