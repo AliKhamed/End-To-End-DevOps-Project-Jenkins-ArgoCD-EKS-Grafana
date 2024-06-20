@@ -69,18 +69,24 @@ pipeline {
 
         stage('Deploy on EKS') {
             steps {
-                script { 
+                script {
+                    // Configure AWS CLI with Jenkins credentials
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: awsCredentialsID, accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
                         sh """
-                            aws eks --region $AWS_REGION update-kubeconfig --name $CLUSTER_NAME --profile default
-                            
+                            aws eks --region $AWS_REGION update-kubeconfig --name $CLUSTER_NAME
                         """
-                            
-                        sh """
-                            kubectl apply -f argoCD_application.yaml
-                        """
+                    }
+
+                    // Set KUBECONFIG environment variable
+                    env.KUBECONFIG = "${KUBECONFIG_PATH}"
+
+                    // Apply Kubernetes manifests
+                    sh """
+                        kubectl apply -f argoCD_application.yaml
+                    """
                 }
             }
-         }
+        }
     }
 
     post {
