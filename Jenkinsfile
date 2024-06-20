@@ -73,9 +73,7 @@ pipeline {
             steps {
                 script {
  
-                    # Update packages inside the cluster
                     sh "aws eks update-kubeconfig --name $CLUSTER_NAME"
-                    # Deploy an application
                     sh "kubectl apply -f argoCD_application.yaml"
                 }
             }
