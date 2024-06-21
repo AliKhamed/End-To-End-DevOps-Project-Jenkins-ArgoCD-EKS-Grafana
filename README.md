@@ -218,7 +218,7 @@ This project implements a comprehensive End-to-End DevOps automation pipeline us
 
 
 3. **Configure Shared Library:**
-[Useed Shared Library](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/tree/main/shared_library/vars)
+[Used Shared Library](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/tree/main/shared_library/vars)
 
 - Add repository URL and name in Jenkins system configuration:
 
