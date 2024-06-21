@@ -4,20 +4,14 @@ pipeline {
 
     environment {
         dockerHubCredentialsID = 'DockerHub'   // DockerHub credentials ID.
-        imageName = 'alikhames/java-app'        // DockerHub repo/image name.
-        gitRepoName = 'End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana'
+        imageName = 'alikhames/new-java-app'        // DockerHub repo/image name.
+        gitRepoName = 'ArgoCD_k8s_manifest_files'
+        githubFilePath = 'k8s_manifest_files/deployment.yml'
         gitUserName = 'Alikhamed'
         gitUserEmail = 'Alikhames566@gmail.com'
         githubToken = 'github-token'
         sonarqubeUrl = 'http://192.168.49.1:9000/'
-        sonarTokenCredentialsID = 'sonar-token'
-        eksTokenCredentialsID = 'eks-token'  // Assuming this holds the EKS API token directly
-        CLUSTER_NAME = 'ivolve_eks_cluster'
-        KUBECONFIG_PATH = '/var/lib/jenkins/.kube/config'
-        awsCredentialsID = 'aws-credentials'  
-        AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS_KEY_ID')
-        AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
-        AWS_DEFAULT_REGION = "us-east-1"
+        sonarTokenCredentialsID = 'sonar-token'       
     }
 
     stages {       
@@ -61,36 +55,10 @@ pipeline {
             }
         }
 
-        stage('Edit new image in deployment.yaml file') {
+        stage('Edit new image in deployment.yaml file and push new image on ArgoCD manifest files github repo') {
             steps {
                 script { 
-                    editNewImage("${githubToken}", "${imageName}", "${gitUserEmail}", "${gitUserName}", "${gitRepoName}")
-                }
-            }
-        }
-
-        stage('Deploy on EKS') {
-            steps {
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: awsCredentialsID, accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
-                    script {
-                        // Configure AWS CLI with Jenkins credentials
-                        sh """
-                            aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
-                            aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
-                            aws configure set default.region $AWS_DEFAULT_REGION
-                            aws eks update-kubeconfig --name $CLUSTER_NAME
-                            sed -i 's|client.authentication.k8s.io/v1alpha1|client.authentication.k8s.io/v1beta1|g' $KUBECONFIG_PATH
-                            cat $KUBECONFIG_PATH
-                        """
-
-                        // Set KUBECONFIG environment variable
-                        env.KUBECONFIG = "${KUBECONFIG_PATH}"
-
-                        // Apply Kubernetes manifests with validation turned off
-                        sh """
-                            kubectl apply -f argoCD_application.yaml --validate=false
-                        """
-                    }
+                    editNewImage("${githubToken}", "${imageName}", "${gitUserEmail}", "${gitUserName}", "${gitRepoName}", "${githubFilePath}")
                 }
             }
         }

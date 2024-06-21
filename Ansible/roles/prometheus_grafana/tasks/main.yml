@@ -1,0 +1,171 @@
+- name: Add Prometheus repo to Helm
+  command: helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+  register: add_prometheus_repo
+  ignore_errors: true
+
+- name: Add Grafana repo to Helm
+  command: helm repo add grafana https://grafana.github.io/helm-charts
+  register: add_grafana_repo
+  ignore_errors: true
+
+- name: Update Helm repositories
+  command: helm repo update
+  register: update_helm_repos
+  ignore_errors: true
+
+- name: Install Prometheus using Helm
+  community.kubernetes.helm:
+    name: prometheus
+    chart_ref: prometheus-community/prometheus
+    release_namespace: monitoring
+    create_namespace: true
+    wait: yes
+    wait_timeout: 600
+
+- name: Install Grafana using Helm
+  community.kubernetes.helm:
+    name: grafana
+    chart_ref: grafana/grafana
+    release_namespace: monitoring
+    wait: yes
+
+- name: Update Prometheus service to LoadBalancer
+  kubernetes.core.k8s:
+    state: present
+    namespace: monitoring
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: prometheus-server
+        namespace: monitoring
+      spec:
+        type: LoadBalancer
+        ports:
+          - port: 9090
+            targetPort: 9090
+
+- name: Update Grafana service to LoadBalancer
+  kubernetes.core.k8s:
+    state: present
+    namespace: monitoring
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: grafana
+        namespace: monitoring
+      spec:
+        type: LoadBalancer
+        ports:
+          - port: 3000
+            targetPort: 3000
+
+- name: Wait for Prometheus LoadBalancer IP
+  kubernetes.core.k8s_info:
+    kind: Service
+    namespace: monitoring
+    name: prometheus-server
+  register: prometheus_service
+  until: prometheus_service.resources[0].status.loadBalancer.ingress[0].ip is defined
+  retries: 10
+  delay: 30
+
+- name: Wait for Grafana LoadBalancer IP
+  kubernetes.core.k8s_info:
+    kind: Service
+    namespace: monitoring
+    name: grafana
+  register: grafana_service
+  until: grafana_service.resources[0].status.loadBalancer.ingress[0].ip is defined
+  retries: 10
+  delay: 30
+
+- name: Print Prometheus URL
+  debug:
+    msg: "Prometheus is accessible at http://{{ prometheus_service.resources[0].status.loadBalancer.ingress[0].ip }}:9090"
+
+- name: Print Grafana URL
+  debug:
+    msg: "Grafana is accessible at http://{{ grafana_service.resources[0].status.loadBalancer.ingress[0].ip }}:3000"
+
+
+# This on minikube cluster
+
+# - name: Add Prometheus repo to Helm
+#   command: helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+#   register: add_prometheus_repo
+#   ignore_errors: true
+
+# - name: Add Grafana repo to Helm
+#   command: helm repo add grafana https://grafana.github.io/helm-charts
+#   register: add_grafana_repo
+#   ignore_errors: true
+
+# - name: Update Helm repositories
+#   command: helm repo update
+#   register: update_helm_repos
+#   ignore_errors: true
+
+# - name: Install Prometheus using Helm
+#   community.kubernetes.helm:
+#     name: prometheus
+#     chart_ref: prometheus-community/prometheus
+#     release_namespace: monitoring
+#     create_namespace: true
+#     wait: yes
+#     # wait_timeout: 500  # Increase timeout to 300 seconds (adjust as needed)
+
+# - name: Install Grafana using Helm
+#   community.kubernetes.helm:
+#     name: grafana
+#     chart_ref: grafana/grafana
+#     release_namespace: monitoring
+#     wait: yes
+#     # wait_timeout: 500  # Increase timeout to 300 seconds (adjust as needed)
+
+# - name: Update Prometheus service to NodePort
+#   kubernetes.core.k8s:
+#     state: present
+#     namespace: monitoring
+#     definition:
+#       apiVersion: v1
+#       kind: Service
+#       metadata:
+#         name: prometheus-server
+#         namespace: monitoring
+#       spec:
+#         type: NodePort
+#         ports:
+#           - port: 9090
+#             targetPort: 9090
+#             nodePort: 30900  # Specify a nodePort value that fits your Minikube configuration
+
+# - name: Update Grafana service to NodePort
+#   kubernetes.core.k8s:
+#     state: present
+#     namespace: monitoring
+#     definition:
+#       apiVersion: v1
+#       kind: Service
+#       metadata:
+#         name: grafana
+#         namespace: monitoring
+#       spec:
+#         type: NodePort
+#         ports:
+#           - port: 3000
+#             targetPort: 3000
+#             nodePort: 30901  # Specify a nodePort value that fits your Minikube configuration
+
+# - name: Get Minikube IP
+#   command: minikube ip
+#   register: minikube_ip
+
+# - name: Print Prometheus URL
+#   debug:
+#     msg: "Prometheus is accessible at http://{{ minikube_ip.stdout }}:30900"
+
+# - name: Print Grafana URL
+#   debug:
+#     msg: "Grafana is accessible at http://{{ minikube_ip.stdout }}:30901"

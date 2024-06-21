@@ -46,8 +46,8 @@ module "eks" {
   source             = "./modules/eks"
   cluster_name       = "ivolve_eks_cluster"
   subnet_ids         = [module.network.subnet1_id, module.network.subnet2_id]
-  desired_capacity   = 1
-  max_size           = 1
+  desired_capacity   = 2
+  max_size           = 2
   min_size           = 1
   instance_type      = "t3.medium"
   ssh_key_name       = var.key_name
