@@ -1,9 +1,9 @@
-# End To End DevOps Automation Project Jenkins ArgoCD EKS Grafana
+# End To End DevOps Automation Project Jenkins SonarQube ArgoCD EKS
 
 ![](https://github.com/AliKhamed/MultiCloudDevOpsProject/blob/main/screenshots/appDiagram.gif)
 
 
-This project implements a comprehensive End-to-End DevOps automation pipeline using Jenkins for continuous integration, SonarQube for code quality analysis, ArgoCD for GitOps-based continuous deployment on Amazon EKS (Elastic Kubernetes Service). It leverages Prometheus and Grafana for monitoring and observability, ensuring efficient management and optimization of the entire software delivery lifecycle.
+This project implements a comprehensive End-to-End DevOps automation pipeline using Jenkins for continuous integration, SonarQube for code quality analysis, ArgoCD for GitOps-based continuous deployment on Amazon EKS (Elastic Kubernetes Service).
 
 ## Table of Contents
 
