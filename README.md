@@ -104,22 +104,22 @@ This project implements a comprehensive End-to-End DevOps automation pipeline us
     ```
 2. **Install Jenkins, SonarQube, Docker, and OC CLI On EC2:**
 
-    Use Ansible roles to install the necessary services.
-    And Use host: ec2_ip to Install this Roles On EC2
-    And Run playbook.yml playbook
+- Use Ansible roles to install the necessary services.
+- And Use host: ec2_ip to Install this Roles On EC2
+- And Run playbook.yml playbook
 
 
-3. **Install ArgoCD On EKS Cluster:**
+3. **Update Config File And Install ArgoCD On EKS Cluster:**
 
-    Use hosts: localhost to Configure Config file ~/.kube/config in Your Local Machine
-    And Run eks_setup.yml playbook
+- Use hosts: localhost to Configure Config file ~/.kube/config in Your Local Machine
+- And Run eks_setup.yml playbook.
 
-    ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/ansible1.png)
+
 
 
 4. **Dynamic Inventory:**
 
-    Use the aws_ec2 plugin for dynamic inventory.
+    - Use the aws_ec2 plugin for dynamic inventory.
 
     ```
         plugin: amazon.aws.aws_ec2
@@ -138,7 +138,7 @@ This project implements a comprehensive End-to-End DevOps automation pipeline us
 
 5. **Generate Private Key:**
 
-    Terraform will generate private_key.pem and add it to the Ansible folder.
+- Terraform will generate private_key.pem and add it to the Ansible folder.
 
 6. **Run Ansible playbook.yml Playbook:**
 
@@ -163,30 +163,50 @@ This project implements a comprehensive End-to-End DevOps automation pipeline us
         ansible-playbook  eks_setup.yml
 
     ```
+    ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/ansible1.png)
 
     #### Outputs
 
     - ArgoCD LoadBalancer URL And Admin Initial Password
 
-    - Promethues LoadBalancer URL
+     ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/argocdUrl.png)
 
-    - Grafana LoadBalancer URL And Admin Initial Password
+     #### Check ArgoCD GUI
+
+    If See This Page Press On Accept The Risk And Continue
+
+     ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/argocdUrl2.png)
+
+    And Copy The Password From Ansible Output And Put It In Password Field
+
+     ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/argocdUrl3.png)
+    
+    And Check Your App That Created By Ansible Playbook
+    Also This App Will Updated Auto After Run Jenkins Pipeline Beacuse Jenkins Will Edite The Image Name In Your Deployment Manifest Files In Your GitHub Repo.
+
+     ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/argocdApp.png)
+
+    In EKS Cluster
+
+     ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/argocdAll.png)
 
 
 ## Jenkins Configuration
 
+### After Ansible Playbook Completed Successfully Copy EC2 Public IP And Put It In Your Browser http<EC2_IP>:8080
+
+
 1. **Install Plugins:**
     - Suggested plugins
 
-    ![](https://github.com/AliKhamed/MultiCloudDevOpsProject/blob/dev/screenshots/jenkinsPlugins.png)
-
-    - SonarQube Scanner
-    
-    ![](https://github.com/AliKhamed/MultiCloudDevOpsProject/blob/dev/screenshots/sonarPlugins.png)
+    ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/jenkinsPlugins.png)
 
     - Groovy Plugins: To Shared Library
+    ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/argocdAll.png)
 
-    ![](https://github.com/AliKhamed/MultiCloudDevOpsProject/blob/dev/screenshots/plugins2.png)
+    
+
+    ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/argocdAll.png)
 
 
 2. **Create Credentials:**
