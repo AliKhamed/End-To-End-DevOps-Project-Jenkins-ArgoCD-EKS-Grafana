@@ -6,7 +6,7 @@ pipeline {
         dockerHubCredentialsID = 'DockerHub'   // DockerHub credentials ID.
         imageName = 'alikhames/new-java-app'        // DockerHub repo/image name.
         gitRepoName = 'ArgoCD_k8s_manifest_files'
-        githubFilePath = 'k8s_manifest_files/deployment.yml'
+        githubFilePath = 'dev'
         gitUserName = 'Alikhamed'
         gitUserEmail = 'Alikhames566@gmail.com'
         githubToken = 'github-token'
