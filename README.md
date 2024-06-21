@@ -37,7 +37,7 @@ This project implements a comprehensive End-to-End DevOps automation pipeline us
     ```
 2. **Configure Variables:**
 
-    Edit the terraform.tfvars file to set values for your AWS setup.
+- Edit the terraform.tfvars file to set values for your AWS setup.
 
 3. **Initialize Terraform:**
 
@@ -173,7 +173,7 @@ This project implements a comprehensive End-to-End DevOps automation pipeline us
 
      #### Check ArgoCD GUI
 
-    If See This Page Press On Accept The Risk And Continue
+- If See This Page Press On Accept The Risk And Continue
 
      ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/argocdUrl2.png)
 
@@ -181,12 +181,12 @@ This project implements a comprehensive End-to-End DevOps automation pipeline us
 
      ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/argocdUrl3.png)
     
-    And Check Your App That Created By Ansible Playbook
+- And Check Your App That Created By Ansible Playbook
     Also This App Will Updated Auto After Run Jenkins Pipeline Beacuse Jenkins Will Edite The Image Name In Your Deployment Manifest Files In Your GitHub Repo.
 
      ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/argocdApp.png)
 
-    In EKS Cluster
+- In EKS Cluster
 
      ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/argocdAll.png)
 
@@ -197,16 +197,16 @@ This project implements a comprehensive End-to-End DevOps automation pipeline us
 
 
 1. **Install Plugins:**
-    - Suggested plugins
+
+- Suggested plugins
 
     ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/jenkinsPlugins.png)
 
-    - Groovy Plugins: To Shared Library
-    ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/argocdAll.png)
+- Groovy And Sonar Scanner Plugins
 
-    
+    ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/plugins1.png)
 
-    ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/argocdAll.png)
+    ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/plugins2.png)
 
 
 2. **Create Credentials:**
@@ -214,27 +214,31 @@ This project implements a comprehensive End-to-End DevOps automation pipeline us
     - SonarQube token
     - DockerHub token
 
-    ![](https://github.com/AliKhamed/MultiCloudDevOpsProject/blob/dev/screenshots/cred1.png)
+     ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/cred1.png)
 
 
 3. **Configure Shared Library:**
 
 - Add repository URL and name in Jenkins system configuration:
 
-    ![](https://github.com/AliKhamed/MultiCloudDevOpsProject/blob/dev/screenshots/sharedLib.png)
-    ![](https://github.com/AliKhamed/MultiCloudDevOpsProject/blob/dev/screenshots/sharedLib2.png)
+     ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/lib1.png)
+
+      ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/lib2.png)
 
 
 
 4. **Create Pipeline:**
 
-    - Create a new pipeline.
+- Create a new pipeline.
 
-    ![](https://github.com/AliKhamed/MultiCloudDevOpsProject/blob/dev/screenshots/pipeline1.png)
+![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/pipe1.png)
 
-    - Choose SCM and add repository URL and branch name.
 
-    ![](https://github.com/AliKhamed/MultiCloudDevOpsProject/blob/dev/screenshots/pipeline2.png)
+- Choose SCM and add repository URL and branch name.
+
+![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/pipe1.png)
+
+
 
 ## Running the Pipeline
 
@@ -246,23 +250,38 @@ This project implements a comprehensive End-to-End DevOps automation pipeline us
 
     Ensure the pipeline runs successfully.
 
-![](https://github.com/AliKhamed/MultiCloudDevOpsProject/blob/dev/screenshots/pipelineSuccess1.png)
-![](https://github.com/AliKhamed/MultiCloudDevOpsProject/blob/dev/screenshots/pipelineSuccess2.png)
+![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/pip1.png)
 
 3. **Check Your Manifest Files is updated in Your Repo**
 
+- Enter In Your giHub Repo And Check It
 
+![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/manifestFile.png)
+
+    - Image Updated Successfully
 
 
 ## EKS Setup
 
 1. **Ckeck ArgoCD Installed In argocd namespace**
 
-2. **Ckeck Promethues And Grafana Installed In monitoring namespace**
+    ```
+    Kubectl get all -n argocd
+
+    ```
+    ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/argocdAll.png)
+
 
 3. **Ckeck ArgoCD Application In ArgoCD GUI**
+    
+    ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/argocdApp.png)
 
 4. **Sync Your App After Running Jenkins**
+
+- ArgoCD By Default Sync And Trigger Your Repo Every 3 minute 
+- Or You Can Configure Webehook On GitHub 
+
+    ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/argosync.png)
 
 
 
@@ -272,16 +291,12 @@ This project implements a comprehensive End-to-End DevOps automation pipeline us
 
     Review code quality reports on SonarQube.
 
-![](https://github.com/AliKhamed/MultiCloudDevOpsProject/blob/dev/screenshots/sonarSuccess1.png)
-
-![](https://github.com/AliKhamed/MultiCloudDevOpsProject/blob/dev/screenshots/sonarSuccess2.png)
-
-![](https://github.com/AliKhamed/MultiCloudDevOpsProject/blob/dev/screenshots/sonarSuccess3.png)
+    ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/sonarQube.png)
 
 
 2. **Application Deployment On ArgoCD:**
 
-    Verify your application is running on the eks cluster.
+- Verify your application is running on the eks cluster.
 
 
     ```
@@ -289,17 +304,17 @@ This project implements a comprehensive End-to-End DevOps automation pipeline us
 
     ```
 
-    ![](https://github.com/AliKhamed/MultiCloudDevOpsProject/blob/dev/screenshots/oc1.png)
+     ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/app1.png)
 
-    Get Application Loadbalancer
-
-!   [](https://github.com/AliKhamed/MultiCloudDevOpsProject/blob/dev/screenshots/oc2.png)
-
-    Past It in Your Browser
-
-    ![](https://github.com/AliKhamed/MultiCloudDevOpsProject/blob/dev/screenshots/applicationRun.png)
+- Copy Application Loadbalancer
 
 
-## Contributing
+- Past It in Your Browser
+- And Don't Forget Add Port 8081 After Loadbalancer URl 
 
-    Contributions are welcome! Please submit a pull request or open an issue for any suggestions or improvements.
+   ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/app2.png)
+
+
+## Challenge:  I had hoped to add Prometheus and Grafana to the project, but I encountered some issues. However, I will work on resolving them and aim to include them in the next phase of the project.
+
+   
