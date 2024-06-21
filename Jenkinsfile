@@ -5,7 +5,8 @@ pipeline {
     environment {
         dockerHubCredentialsID = 'DockerHub'   // DockerHub credentials ID.
         imageName = 'alikhames/new-java-app'        // DockerHub repo/image name.
-        gitRepoName = 'ArgoCD_k8s_manifest_files'
+        gitRepoName = 'End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana'
+        gitFilePath = 'ArgoCD_k8s_manifest_files'
         gitUserName = 'Alikhamed'
         gitUserEmail = 'Alikhames566@gmail.com'
         githubToken = 'github-token'
@@ -57,7 +58,7 @@ pipeline {
         stage('Edit new image in deployment.yaml file and push new image on ArgoCD manifest files github repo') {
             steps {
                 script { 
-                    editNewImage("${githubToken}", "${imageName}", "${gitUserEmail}", "${gitUserName}", "${gitRepoName}")
+                    editNewImage("${githubToken}", "${imageName}", "${gitUserEmail}", "${gitUserName}", "${gitRepoName}", "${gitFilePath}")
                 }
             } 
         }

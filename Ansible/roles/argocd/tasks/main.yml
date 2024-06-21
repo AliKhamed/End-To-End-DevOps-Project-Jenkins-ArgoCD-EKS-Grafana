@@ -82,9 +82,9 @@
       spec:
         project: default
         source:
-          repoURL: https://github.com/AliKhamed/ArgoCD_k8s_manifest_files.git
+          repoURL: https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana.git
           targetRevision: HEAD
-          path: . 
+          path: ArgoCD_k8s_manifest_files
         destination:
           server: https://kubernetes.default.svc
           namespace: myapp
