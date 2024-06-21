@@ -59,7 +59,7 @@ pipeline {
                 script { 
                     editNewImage("${githubToken}", "${imageName}", "${gitUserEmail}", "${gitUserName}", "${gitRepoName}")
                 }
-            }
+            } 
         }
     }
 
