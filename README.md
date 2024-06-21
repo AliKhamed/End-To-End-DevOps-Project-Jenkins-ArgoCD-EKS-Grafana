@@ -45,7 +45,6 @@ This project implements a comprehensive End-to-End DevOps automation pipeline us
     terraform init
 
     ```
-    ![](https://github.com/AliKhamed/MultiCloudDevOpsProject/blob/main/screenshots/terrInit.png)
 
 4. **Review the Plan:**
 
@@ -53,7 +52,7 @@ This project implements a comprehensive End-to-End DevOps automation pipeline us
      terraform plan
 
     ```
-    ![](https://github.com/AliKhamed/MultiCloudDevOpsProject/blob/dev/screenshots/terraPlan.png)
+    ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/terraformPlan.png)
 
 5. **Apply the Configuration:**
 
@@ -63,32 +62,37 @@ This project implements a comprehensive End-to-End DevOps automation pipeline us
 
     Confirm the action by typing yes when prompted.
 
-    ![](https://github.com/AliKhamed/MultiCloudDevOpsProject/blob/dev/screenshots/terraApply.png)
+    And The apply will be long between 15 to 20 m because eks cluster take long time
+
+    After Apply Completed 
+     
+     ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/terraformApply.png)
 
 6. **AWS Resources Created:**
 
     - EC2 Instances
 
-        ![](https://github.com/AliKhamed/MultiCloudDevOpsProject/blob/dev/screenshots/ec2.png)
+       ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/ec2.png)
 
     - VPC
 
-        ![](https://github.com/AliKhamed/MultiCloudDevOpsProject/blob/dev/screenshots/vpc2.png)
+         ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/vpc.png)
 
     - CloudWatch with SNS topic for email notifications
 
-        ![](https://github.com/AliKhamed/MultiCloudDevOpsProject/blob/dev/screenshots/cloudwatch.png)
-        ![](https://github.com/AliKhamed/MultiCloudDevOpsProject/blob/dev/screenshots/sns.png)
-        ![](https://github.com/AliKhamed/MultiCloudDevOpsProject/blob/dev/screenshots/snsEmail.png)
+        ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/cloudwatch.png)
+
+        ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/email1.png)
+
+        ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/email2.png)
 
     - S3 Bucket for Terraform state file backend
 
-        ![](https://github.com/AliKhamed/MultiCloudDevOpsProject/blob/dev/screenshots/s3.png)
+        ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/s3.png)
 
     - EKS Cluster
 
-        ![](https://github.com/AliKhamed/MultiCloudDevOpsProject/blob/dev/screenshots/s3.png)
-
+        ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/eks.png)
 
 
 ## Ansible Setup
@@ -104,14 +108,33 @@ This project implements a comprehensive End-to-End DevOps automation pipeline us
     And Use host: ec2_ip to Install this Roles On EC2
     And Run playbook.yml playbook
 
-3. **Install ArgoCD, Prometheus and Grafana On EKS Cluster:**
+
+3. **Install ArgoCD On EKS Cluster:**
 
     Use hosts: localhost to Configure Config file ~/.kube/config in Your Local Machine
     And Run eks_setup.yml playbook
 
+    ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/ansible1.png)
+
+
 4. **Dynamic Inventory:**
 
     Use the aws_ec2 plugin for dynamic inventory.
+
+    ```
+        plugin: amazon.aws.aws_ec2
+        regions:
+        - us-east-1  # Specify your AWS region(s) here
+        filters:
+        tag:Name: Jenkins_server  # Filter instances by the tag Name=test
+        instance-state-name: running  # Only include running instances
+        keyed_groups:
+        - key: tags.Name  # Group instances by their 'Name' tag
+            prefix: tag
+        compose:
+        ansible_host: public_ip_address  # Use the public IP address to connect
+
+    ```
 
 5. **Generate Private Key:**
 
@@ -123,18 +146,17 @@ This project implements a comprehensive End-to-End DevOps automation pipeline us
     ansible-playbook -i aws_ec2.yml playbook.yml
 
     ```
-    ![](https://github.com/AliKhamed/MultiCloudDevOpsProject/blob/dev/screenshots/ansibleApply.png)
-    
+    ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/ansibleApply.png)    
 
 #### Outputs
 
 - SonarQube token
 
-    ![](https://github.com/AliKhamed/MultiCloudDevOpsProject/blob/dev/screenshots/sonarToken1.png)
+    ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/sonarToken1.png)
 
 - Jenkins initial password
 
-    ![](https://github.com/AliKhamed/MultiCloudDevOpsProject/blob/dev/screenshots/jenkinsPass.png)
+    ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/jenkinsPass.png)
 
 7. **Run Ansible eks_setup.yml Playbook**
     ```

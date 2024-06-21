@@ -20,7 +20,7 @@
     release_namespace: monitoring
     create_namespace: true
     wait: yes
-    wait_timeout: 600
+    # wait_timeout: 600
 
 - name: Install Grafana using Helm
   community.kubernetes.helm:

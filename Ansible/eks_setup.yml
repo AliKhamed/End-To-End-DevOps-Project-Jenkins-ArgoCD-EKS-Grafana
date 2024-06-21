@@ -5,4 +5,4 @@
   roles:
     - Update_config
     - argocd
-    - prometheus_grafana
+    # - prometheus_grafana
