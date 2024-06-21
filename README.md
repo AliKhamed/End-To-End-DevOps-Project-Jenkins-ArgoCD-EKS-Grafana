@@ -8,11 +8,11 @@ This project implements a comprehensive End-to-End DevOps automation pipeline us
 ## Table of Contents
 
 - [Prerequisites](#prerequisites)
-- [Project Structure](#project-structure)
 - [Terraform Setup](#terraform-setup)
 - [Ansible Setup](#ansible-setup)
 - [Jenkins Configuration](#jenkins-configuration)
 - [Running the Pipeline](#running-the-pipeline)
+- [EKS Setup](#eks-setup)
 - [Checking Results](#checking-results)
 - [Contributing](#contributing)
 
@@ -25,72 +25,7 @@ This project implements a comprehensive End-to-End DevOps automation pipeline us
 - GitHub Account
 - DockerHub Account
 
-## Project Structure
 
-```
-├── Terraform
-│   ├── backend.tf
-│   ├── key-pair.tf
-│   ├── main.tf
-│   ├── modules
-│   │   ├── cloudwatch
-│   │   │   ├── main.tf
-│   │   │   ├── output.tf
-│   │   │   └── variables.tf
-│   │   ├── ec2
-│   │   │   ├── main.tf
-│   │   │   ├── output.tf
-│   │   │   └── variables.tf
-|   |   ├── eks
-│   │   │   ├── main.tf
-│   │   │   ├── output.tf
-│   │   │   └── variables.tf
-│   │   └── network
-│   │       ├── main.tf
-│   │       ├── output.tf
-│   │       └── variables.tf
-│   ├── terraform.tfvars
-│   └── variables.tf
-├── Ansible
-│   ├── ansible.cfg
-│   ├── aws_ec2.yml
-│   ├── playbook.yml
-│   └── roles
-│       ├── docker
-│       │   ├── tasks
-│       │   │   └── main.yml
-│       │   └── vars
-│       │       └── main.yml
-│       ├── jenkins
-│       │   ├── tasks
-│       │   │   └── main.yml
-│       │   └── vars
-│       │       └── main.yml
-│       ├── oc_cli
-│       │   └── tasks
-│       │       └── main.yml
-│       └── sonarqube
-│           ├── tasks
-│           │   └── main.yml
-│           └── vars
-│               └── main.yml
-├── Application
-├── Jenkinsfile
-├── oc
-│   ├── deployment.yml
-│   ├── route.yml
-│   └── service.yml
-├── shared_library
-│   └── vars
-│       ├── buildAndPushDockerImage.groovy
-│       ├── build.groovy
-│       ├── deployOnOc.groovy
-│       ├── editNewImage.groovy
-│       ├── runUnitTests.groovy
-│       └── sonarQubeAnalysis.groovy
-└── README.md
-
-```
 ## Terraform Setup
 
 1. **Clone the Repository:**
@@ -150,6 +85,11 @@ This project implements a comprehensive End-to-End DevOps automation pipeline us
 
         ![](https://github.com/AliKhamed/MultiCloudDevOpsProject/blob/dev/screenshots/s3.png)
 
+    - EKS Cluster
+
+        ![](https://github.com/AliKhamed/MultiCloudDevOpsProject/blob/dev/screenshots/s3.png)
+
+
 
 ## Ansible Setup
 
@@ -158,19 +98,26 @@ This project implements a comprehensive End-to-End DevOps automation pipeline us
     cd ../Ansible
 
     ```
-2. **Install Jenkins, SonarQube, Docker, and OC CLI:**
+2. **Install Jenkins, SonarQube, Docker, and OC CLI On EC2:**
 
     Use Ansible roles to install the necessary services.
+    And Use host: ec2_ip to Install this Roles On EC2
+    And Run playbook.yml playbook
 
-3. **Dynamic Inventory:**
+3. **Install ArgoCD, Prometheus and Grafana On EKS Cluster:**
+
+    Use hosts: localhost to Configure Config file ~/.kube/config in Your Local Machine
+    And Run eks_setup.yml playbook
+
+4. **Dynamic Inventory:**
 
     Use the aws_ec2 plugin for dynamic inventory.
 
-4. **Generate Private Key:**
+5. **Generate Private Key:**
 
     Terraform will generate private_key.pem and add it to the Ansible folder.
 
-5. **Run Ansible Playbook:**
+6. **Run Ansible playbook.yml Playbook:**
 
     ```
     ansible-playbook -i aws_ec2.yml playbook.yml
@@ -179,7 +126,7 @@ This project implements a comprehensive End-to-End DevOps automation pipeline us
     ![](https://github.com/AliKhamed/MultiCloudDevOpsProject/blob/dev/screenshots/ansibleApply.png)
     
 
-6. **Outputs:**
+#### Outputs
 
 - SonarQube token
 
@@ -188,6 +135,20 @@ This project implements a comprehensive End-to-End DevOps automation pipeline us
 - Jenkins initial password
 
     ![](https://github.com/AliKhamed/MultiCloudDevOpsProject/blob/dev/screenshots/jenkinsPass.png)
+
+7. **Run Ansible eks_setup.yml Playbook**
+    ```
+        ansible-playbook  eks_setup.yml
+
+    ```
+
+    #### Outputs
+
+    - ArgoCD LoadBalancer URL And Admin Initial Password
+
+    - Promethues LoadBalancer URL
+
+    - Grafana LoadBalancer URL And Admin Initial Password
 
 
 ## Jenkins Configuration
@@ -209,7 +170,6 @@ This project implements a comprehensive End-to-End DevOps automation pipeline us
 2. **Create Credentials:**
     - GitHub token
     - SonarQube token
-    - OpenShift token
     - DockerHub token
 
     ![](https://github.com/AliKhamed/MultiCloudDevOpsProject/blob/dev/screenshots/cred1.png)
@@ -247,6 +207,22 @@ This project implements a comprehensive End-to-End DevOps automation pipeline us
 ![](https://github.com/AliKhamed/MultiCloudDevOpsProject/blob/dev/screenshots/pipelineSuccess1.png)
 ![](https://github.com/AliKhamed/MultiCloudDevOpsProject/blob/dev/screenshots/pipelineSuccess2.png)
 
+3. **Check Your Manifest Files is updated in Your Repo**
+
+
+
+
+## EKS Setup
+
+1. **Ckeck ArgoCD Installed In argocd namespace**
+
+2. **Ckeck Promethues And Grafana Installed In monitoring namespace**
+
+3. **Ckeck ArgoCD Application In ArgoCD GUI**
+
+4. **Sync Your App After Running Jenkins**
+
+
 
 ## Checking Results
 
@@ -261,26 +237,25 @@ This project implements a comprehensive End-to-End DevOps automation pipeline us
 ![](https://github.com/AliKhamed/MultiCloudDevOpsProject/blob/dev/screenshots/sonarSuccess3.png)
 
 
-2. **Application Deployment:**
+2. **Application Deployment On ArgoCD:**
 
-    Verify your application is running on the OpenShift cluster.
+    Verify your application is running on the eks cluster.
 
-    Login In Your Cluster and Run 
-
-    ```
-    oc get all -n namespace
 
     ```
+    kubectl get all -n myapp
 
-![](https://github.com/AliKhamed/MultiCloudDevOpsProject/blob/dev/screenshots/oc1.png)
+    ```
 
-Get Application Route
+    ![](https://github.com/AliKhamed/MultiCloudDevOpsProject/blob/dev/screenshots/oc1.png)
 
-![](https://github.com/AliKhamed/MultiCloudDevOpsProject/blob/dev/screenshots/oc2.png)
+    Get Application Loadbalancer
 
-Past It in Your Browser
+!   [](https://github.com/AliKhamed/MultiCloudDevOpsProject/blob/dev/screenshots/oc2.png)
 
-![](https://github.com/AliKhamed/MultiCloudDevOpsProject/blob/dev/screenshots/applicationRun.png)
+    Past It in Your Browser
+
+    ![](https://github.com/AliKhamed/MultiCloudDevOpsProject/blob/dev/screenshots/applicationRun.png)
 
 
 ## Contributing

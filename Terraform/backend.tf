@@ -1,24 +1,24 @@
-# resource "aws_s3_bucket" "ivolve-s3" {
-#   bucket = var.bucket-name
-# }
-# resource "aws_s3_bucket_versioning" "ivolve-s3-versioning" {
-#   bucket = aws_s3_bucket.ivolve-s3.id
-#   versioning_configuration {
-#     status = "Enabled"
-#   }
-# }
+resource "aws_s3_bucket" "ivolve-s3" {
+  bucket = var.bucket-name
+}
+resource "aws_s3_bucket_versioning" "ivolve-s3-versioning" {
+  bucket = aws_s3_bucket.ivolve-s3.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
 
-# resource "aws_dynamodb_table" "ivolve-dynamodb-table" {
-#   name         = "terraformFstatFile"
-#   billing_mode = "PAY_PER_REQUEST"
-#   hash_key     = "LockID"
+resource "aws_dynamodb_table" "ivolve-dynamodb-table" {
+  name         = "terraformFstatFile"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "LockID"
 
 
-#   attribute {
-#     name = "LockID"
-#     type = "S"
-#   }
-# }
+  attribute {
+    name = "LockID"
+    type = "S"
+  }
+}
 ############################################################################################
 
 # You must run the above code before run terraform backend code 
