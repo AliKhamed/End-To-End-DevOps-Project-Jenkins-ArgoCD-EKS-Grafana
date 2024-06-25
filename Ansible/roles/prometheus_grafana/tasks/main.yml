@@ -1,171 +1,74 @@
-- name: Add Prometheus repo to Helm
+- name: Add Prometheus community Helm repository
   command: helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-  register: add_prometheus_repo
-  ignore_errors: true
-
-- name: Add Grafana repo to Helm
-  command: helm repo add grafana https://grafana.github.io/helm-charts
-  register: add_grafana_repo
-  ignore_errors: true
+  register: helm_repo_add
+  changed_when: "'repository' in helm_repo_add.stdout"
 
 - name: Update Helm repositories
   command: helm repo update
-  register: update_helm_repos
-  ignore_errors: true
+  when: helm_repo_add is succeeded
 
-- name: Install Prometheus using Helm
-  community.kubernetes.helm:
-    name: prometheus
-    chart_ref: prometheus-community/prometheus
-    release_namespace: monitoring
-    create_namespace: true
-    wait: yes
-    # wait_timeout: 600
+- name: Create Prometheus namespace
+  command: kubectl create namespace prometheus
+  register: kubectl_create_ns
+  changed_when: "'created' in kubectl_create_ns.stdout"
+  failed_when: kubectl_create_ns.rc != 0 and 'already exists' not in kubectl_create_ns.stdout
+
+- name: Install Prometheus
+  command: >
+    helm install prometheus prometheus-community/prometheus
+    --namespace prometheus
+    --set alertmanager.persistentVolume.storageClass="gp2"
+    --set server.persistentVolume.storageClass="gp2"
+    --set service.type=LoadBalancer
+  when: kubectl_create_ns is succeeded
+
+- name: Associate IAM OIDC provider with EKS cluster
+  command: eksctl utils associate-iam-oidc-provider --cluster {{ eks_cluster_name }} --approve
+
+- name: Create IAM service account for EBS CSI controller
+  command: >
+    eksctl create iamserviceaccount
+    --name ebs-csi-controller-sa
+    --namespace kube-system
+    --cluster {{ eks_cluster_name }}
+    --role-name AmazonEKS_EBS_CSI_DriverRole  
+    --role-only
+    --attach-policy-arn arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy
+    --approve
+
+- name: Create EBS CSI driver addon
+  command: >
+    eksctl create addon --name aws-ebs-csi-driver --cluster {{ eks_cluster_name }}
+    --service-account-role-arn arn:aws:iam::{{ account_id }}:role/AmazonEKS_EBS_CSI_DriverRole
+    --force
+
+- name: Add Grafana Helm repository
+  command: helm repo add grafana https://grafana.github.io/helm-charts
+  register: grafana_repo_add
+  changed_when: "'repository' in grafana_repo_add.stdout"
+
+- name: Update Helm repositories for Grafana
+  command: helm repo update
+  when: grafana_repo_add is succeeded
+
+- name: Create Grafana namespace
+  command: kubectl create namespace grafana
+  register: grafana_create_ns
+  changed_when: "'created' in grafana_create_ns.stdout"
+  failed_when: grafana_create_ns.rc != 0 and 'already exists' not in grafana_create_ns.stdout
 
 - name: Install Grafana using Helm
-  community.kubernetes.helm:
+  become: true
+  helm:
     name: grafana
     chart_ref: grafana/grafana
-    release_namespace: monitoring
-    wait: yes
-
-- name: Update Prometheus service to LoadBalancer
-  kubernetes.core.k8s:
-    state: present
-    namespace: monitoring
-    definition:
-      apiVersion: v1
-      kind: Service
-      metadata:
-        name: prometheus-server
-        namespace: monitoring
-      spec:
-        type: LoadBalancer
-        ports:
-          - port: 9090
-            targetPort: 9090
-
-- name: Update Grafana service to LoadBalancer
-  kubernetes.core.k8s:
-    state: present
-    namespace: monitoring
-    definition:
-      apiVersion: v1
-      kind: Service
-      metadata:
-        name: grafana
-        namespace: monitoring
-      spec:
-        type: LoadBalancer
-        ports:
-          - port: 3000
-            targetPort: 3000
-
-- name: Wait for Prometheus LoadBalancer IP
-  kubernetes.core.k8s_info:
-    kind: Service
-    namespace: monitoring
-    name: prometheus-server
-  register: prometheus_service
-  until: prometheus_service.resources[0].status.loadBalancer.ingress[0].ip is defined
-  retries: 10
-  delay: 30
-
-- name: Wait for Grafana LoadBalancer IP
-  kubernetes.core.k8s_info:
-    kind: Service
-    namespace: monitoring
-    name: grafana
-  register: grafana_service
-  until: grafana_service.resources[0].status.loadBalancer.ingress[0].ip is defined
-  retries: 10
-  delay: 30
-
-- name: Print Prometheus URL
-  debug:
-    msg: "Prometheus is accessible at http://{{ prometheus_service.resources[0].status.loadBalancer.ingress[0].ip }}:9090"
-
-- name: Print Grafana URL
-  debug:
-    msg: "Grafana is accessible at http://{{ grafana_service.resources[0].status.loadBalancer.ingress[0].ip }}:3000"
-
-
-# This on minikube cluster
-
-# - name: Add Prometheus repo to Helm
-#   command: helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-#   register: add_prometheus_repo
-#   ignore_errors: true
-
-# - name: Add Grafana repo to Helm
-#   command: helm repo add grafana https://grafana.github.io/helm-charts
-#   register: add_grafana_repo
-#   ignore_errors: true
-
-# - name: Update Helm repositories
-#   command: helm repo update
-#   register: update_helm_repos
-#   ignore_errors: true
-
-# - name: Install Prometheus using Helm
-#   community.kubernetes.helm:
-#     name: prometheus
-#     chart_ref: prometheus-community/prometheus
-#     release_namespace: monitoring
-#     create_namespace: true
-#     wait: yes
-#     # wait_timeout: 500  # Increase timeout to 300 seconds (adjust as needed)
-
-# - name: Install Grafana using Helm
-#   community.kubernetes.helm:
-#     name: grafana
-#     chart_ref: grafana/grafana
-#     release_namespace: monitoring
-#     wait: yes
-#     # wait_timeout: 500  # Increase timeout to 300 seconds (adjust as needed)
-
-# - name: Update Prometheus service to NodePort
-#   kubernetes.core.k8s:
-#     state: present
-#     namespace: monitoring
-#     definition:
-#       apiVersion: v1
-#       kind: Service
-#       metadata:
-#         name: prometheus-server
-#         namespace: monitoring
-#       spec:
-#         type: NodePort
-#         ports:
-#           - port: 9090
-#             targetPort: 9090
-#             nodePort: 30900  # Specify a nodePort value that fits your Minikube configuration
-
-# - name: Update Grafana service to NodePort
-#   kubernetes.core.k8s:
-#     state: present
-#     namespace: monitoring
-#     definition:
-#       apiVersion: v1
-#       kind: Service
-#       metadata:
-#         name: grafana
-#         namespace: monitoring
-#       spec:
-#         type: NodePort
-#         ports:
-#           - port: 3000
-#             targetPort: 3000
-#             nodePort: 30901  # Specify a nodePort value that fits your Minikube configuration
-
-# - name: Get Minikube IP
-#   command: minikube ip
-#   register: minikube_ip
-
-# - name: Print Prometheus URL
-#   debug:
-#     msg: "Prometheus is accessible at http://{{ minikube_ip.stdout }}:30900"
-
-# - name: Print Grafana URL
-#   debug:
-#     msg: "Grafana is accessible at http://{{ minikube_ip.stdout }}:30901"
+    version: "5.0.4"  
+    namespace: grafana
+    values_files:
+      - prom-data-source.yaml
+    set_values:
+      persistence.storageClassName: "gp2"
+      persistence.enabled: true
+      adminPassword: "Password123@"
+      service.type: LoadBalancer
+  when: grafana_create_ns is succeeded  

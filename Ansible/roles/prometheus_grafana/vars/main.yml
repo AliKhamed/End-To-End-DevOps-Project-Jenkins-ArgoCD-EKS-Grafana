@@ -1,0 +1,2 @@
+eks_cluster_name: ivolve-eks-cluster  # Replace with your EKS cluster name
+account_id: 211125384312  # Replace with your AWS account ID

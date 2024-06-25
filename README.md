@@ -13,7 +13,6 @@ This project implements a comprehensive End-to-End DevOps automation pipeline us
 - [Running the Pipeline](#running-the-pipeline)
 - [EKS Setup](#eks-setup)
 - [Checking Results](#checking-results)
-- [Contributing](#contributing)
 
 
 ## Prerequisites
@@ -107,13 +106,61 @@ This project implements a comprehensive End-to-End DevOps automation pipeline us
 - And Use host: ec2_ip to Install this Roles On EC2
 - And Run playbook.yml playbook
 
+- Roles
 
-3. **Update Config File And Install ArgoCD On EKS Cluster:**
+```
+
+├── docker
+│   ├── tasks
+│   │   └── main.yml
+│   └── vars
+│       └── main.yml
+├── jenkins
+│   ├── tasks
+│   │   └── main.yml
+│   └── vars
+│       └── main.yml
+└── sonarqube
+    ├── tasks
+    │   └── main.yml
+    └── vars
+        └── main.yml
+
+
+```
+- Docker role: To install docker on EC2
+- jenkins role: To install jenkins on EC2 and print initial password of jenkins
+- sonarqube role: To install SonarQube on EC2 and create global token and print it
+
+3. **Update Config File And Install ArgoCD, Prometheus and Grafana On EKS Cluster:**
 
 - Use hosts: localhost to Configure Config file ~/.kube/config in Your Local Machine
 - And Run eks_setup.yml playbook.
+- This ansible playbook will install argocd, promethues and grafana on your eks cluster using roles
 
+- Roles
 
+```
+├── argocd
+│   ├── tasks
+│   │   └── main.yml
+│   └── vars
+│       └── main.yml
+├── prometheus_grafana
+│   ├── tasks
+│   │   └── main.yml
+│   └── vars
+│       └── main.yml
+└── Update_config
+    ├── tasks
+    │   └── main.yml
+    └── vars
+        └── main.yml
+```
+
+- Update_config role: will update your config file
+- argocd role: will install argocd operator using helm and role also will create argocd service loadbalancer and print initial admin password
+- prometheus_grafana role: will install promethues and grafana using helm and also will modify there services types to LoadBlanacer and print it
 
 
 4. **Dynamic Inventory:**
@@ -163,6 +210,8 @@ This project implements a comprehensive End-to-End DevOps automation pipeline us
 
     ```
     ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/ansible1.png)
+
+    ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/ansibleEKS.png)
 
     #### Outputs
 
@@ -363,8 +412,7 @@ pipeline {
 - Or You Can Configure Webehook On GitHub 
 
     ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/argosync.png)
-
-
+    
 
 ## Checking Results
 
@@ -374,8 +422,14 @@ pipeline {
 
     ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/sonarQube.png)
 
+2. **Check Promethues And Grafana GUI**
 
-2. **Application Deployment On ArgoCD:**
+    ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/promethues1.png)
+
+    ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/grafana1.png)
+
+
+3. **Application Deployment On ArgoCD:**
 
 - Verify your application is running on the eks cluster.
 
@@ -396,6 +450,5 @@ pipeline {
    ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/app2.png)
 
 
-## Challenge:  I had hoped to add Prometheus and Grafana to the project, but I encountered some issues. However, I will work on resolving them and aim to include them in the next phase of the project.
 
    

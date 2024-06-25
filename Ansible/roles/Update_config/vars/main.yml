@@ -1,4 +1,4 @@
 ---
-eks_cluster_name: ivolve_eks_cluster  # Replace with your EKS cluster name
+eks_cluster_name: ivolve-eks-cluster  # Replace with your EKS cluster name
 aws_profile: default  # Replace with your AWS CLI profile name
 region: us-east-1  # Replace with your AWS region
