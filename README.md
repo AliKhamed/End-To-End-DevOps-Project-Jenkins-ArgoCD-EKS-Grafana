@@ -2,7 +2,7 @@
 
 ![](https://github.com/AliKhamed/End-To-End-DevOps-Project-Jenkins-ArgoCD-EKS-Grafana/blob/main/screenshots/AppDiagram.gif)
 
-This project implements a comprehensive End-to-End DevOps automation pipeline using Jenkins for continuous integration, SonarQube for code quality analysis, ArgoCD for GitOps-based continuous deployment on Amazon EKS (Elastic Kubernetes Service).
+This project implements a comprehensive End-to-End DevOps automation pipeline using Jenkins for continuous integration, SonarQube for code quality analysis, ArgoCD for GitOps-based continuous deployment on Amazon EKS (Elastic Kubernetes Service). Additionally, Prometheus is integrated for monitoring the EKS cluster and applications, while Grafana provides visualization and analytics for the gathered metrics, ensuring robust observability throughout the deployment lifecycle.
 
 ## Table of Contents
 
